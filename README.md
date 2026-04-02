@@ -92,6 +92,40 @@ The dashboard will be available at `http://localhost:8501`.
 
 ---
 
+## Output Preview
+
+### Dashboard Overview
+![Dashboard Screenshot](screenshots/dashboard_overview.png)
+
+### Key Visualizations
+
+| Visualization | Description |
+|--------------|-------------|
+| **ROI by Channel** | Bar chart comparing return on investment across Google Ads, Facebook, Email, Instagram, and LinkedIn |
+| **Top Campaigns** | Horizontal bar chart showing top 10 campaigns ranked by revenue |
+| **Monthly Trends** | Line chart tracking spend vs. revenue over 12-month period |
+| **Channel Performance** | Scatter plot of CTR vs. conversion rate (bubble size = spend) |
+
+### Model Evaluation Results
+
+| Metric | Value |
+|--------|-------|
+| **R² Score** | 0.70 |
+| **Root Mean Squared Error** | $5,489 |
+| **Mean Absolute Error** | $2,002 |
+
+### Feature Importance
+
+| Rank | Feature | Importance |
+|------|---------|------------|
+| 1 | Clicks | 68.2% |
+| 2 | Conversion Rate | 14.4% |
+| 3 | CTR | 4.7% |
+| 4 | Impressions | 3.7% |
+| 5 | Cost | 2.6% |
+
+---
+
 ## Key Metrics
 
 | Metric | Formula | Business Significance |
