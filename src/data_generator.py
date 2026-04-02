@@ -3,79 +3,142 @@ import numpy as np
 import os
 from datetime import datetime, timedelta
 
-def generate_marketing_data(num_records=5000):
-    np.random.seed(42)
+
+CONFIG = {
+    'num_records': 8000,
+    'random_seed': 42,
+    'missing_revenue_pct': 0.05,
+    'missing_audience_pct': 0.02,
+    'duplicate_pct': 0.01,
+}
+
+
+def get_marketing_channels():
+    return ['Google Ads', 'Facebook', 'Email', 'Instagram', 'LinkedIn']
+
+
+def get_regions():
+    return ['North America', 'Europe', 'Asia Pacific', 'Latin America']
+
+
+def get_target_audiences():
+    return [
+        'Young Adults (18-24)',
+        'Professionals (25-34)',
+        'Adults (35-44)',
+        'Seniors (45+)'
+    ]
+
+
+def get_campaign_names():
+    prefixes = ['Spring', 'Summer', 'Fall', 'Winter', 'Q1', 'Q2', 'Q3', 'Q4', 'Holiday', 'Back to School']
+    suffixes = ['Awareness', 'Retargeting', 'Conversion', 'Promo', 'Launch', 'Sale', 'Retention']
+    return [f'{np.random.choice(prefixes)} {np.random.choice(suffixes)}' for _ in range(20)]
+
+
+def generate_dates(start_date, num_records):
+    num_days = 365
+    weights = np.exp(np.linspace(0, 1, num_days))
+    weights = weights / weights.sum()
+    date_choices = [start_date + timedelta(days=i) for i in range(num_days)]
+    return np.random.choice(date_choices, size=num_records, p=weights)
+
+
+def generate_impressions(num_records):
+    return np.random.lognormal(mean=9, sigma=1.2, size=num_records).astype(int)
+
+
+def calculate_clicks_from_impressions(impressions):
+    ctr_base = np.random.uniform(0.01, 0.08, len(impressions))
+    ctr_with_noise = ctr_base * np.random.uniform(0.8, 1.2, len(impressions))
+    ctr_with_noise = np.clip(ctr_with_noise, 0.005, 0.15)
+    clicks = (impressions * ctr_with_noise).astype(int)
+    clicks = np.maximum(clicks, 1)
+    return clicks
+
+
+def calculate_conversions_from_clicks(clicks):
+    conv_rate = np.random.uniform(0.015, 0.12, len(clicks))
+    conversions = (clicks * conv_rate).astype(int)
+    return conversions
+
+
+def generate_cost_per_click():
+    return np.random.uniform(0.45, 4.50, CONFIG['num_records'])
+
+
+def introduce_missing_values(df):
+    num_revenue_missing = int(len(df) * CONFIG['missing_revenue_pct'])
+    revenue_indices = np.random.choice(df.index, num_revenue_missing, replace=False)
+    df.loc[revenue_indices, 'revenue'] = np.nan
     
-    channels = ['Google Ads', 'Facebook', 'Email', 'Instagram', 'LinkedIn']
-    regions = ['North America', 'Europe', 'Asia Pacific', 'Latin America']
-    target_audiences = ['Young Adults (18-24)', 'Professionals (25-34)', 'Adults (35-44)', 'Seniors (45+)']
+    num_audience_missing = int(len(df) * CONFIG['missing_audience_pct'])
+    audience_indices = np.random.choice(df.index, num_audience_missing, replace=False)
+    df.loc[audience_indices, 'target_audience'] = np.nan
     
-    # Generate dates over the past year
-    end_date = datetime.today()
-    start_date = end_date - timedelta(days=365)
-    dates = [start_date + timedelta(days=np.random.randint(0, 365)) for _ in range(num_records)]
-    
-    # Generate base metrics
-    impressions = np.random.randint(1000, 100000, num_records)
-    
-    # Clicks are a fraction of impressions (CTR between 1% and 10%)
-    ctr_rates = np.random.uniform(0.01, 0.10, num_records)
-    clicks = (impressions * ctr_rates).astype(int)
-    
-    # Conversions are a fraction of clicks (Conv rate between 2% and 15%)
-    conv_rates = np.random.uniform(0.02, 0.15, num_records)
-    conversions = (clicks * conv_rates).astype(int)
-    
-    # Cost per click between $0.5 and $5.0
-    cpc = np.random.uniform(0.5, 5.0, num_records)
-    cost = np.round(clicks * cpc, 2)
-    
-    # Revenue per conversion between $20 and $200
-    rev_per_conv = np.random.uniform(20.0, 200.0, num_records)
-    revenue = np.round(conversions * rev_per_conv, 2)
-    
-    # Assemble dataframe
-    df = pd.DataFrame({
-        'Campaign_ID': [f'CMP_{i:05d}' for i in range(1, num_records + 1)],
-        'Campaign_Name': [f'Campaign_{np.random.choice(["Alpha", "Beta", "Gamma", "Delta", "Echo"])}' for _ in range(num_records)],
-        'Channel': np.random.choice(channels, num_records),
-        'Date': dates,
-        'Impressions': impressions,
-        'Clicks': clicks,
-        'Conversions': conversions,
-        'Cost': cost,
-        'Revenue': revenue,
-        'Target_Audience': np.random.choice(target_audiences, num_records),
-        'Region': np.random.choice(regions, num_records)
-    })
-    
-    # Introduce some missing values (about 5%)
-    mask = np.random.rand(num_records) < 0.05
-    df.loc[mask, 'Revenue'] = np.nan
-    mask2 = np.random.rand(num_records) < 0.02
-    df.loc[mask2, 'Target_Audience'] = np.nan
-    
-    # Introduce some duplicates (about 1%)
-    num_dupes = int(num_records * 0.01)
-    if num_dupes > 0:
-        dupes = df.sample(num_dupes, replace=True)
-        df = pd.concat([df, dupes], ignore_index=True)
-        
     return df
 
-if __name__ == "__main__":
-    df = generate_marketing_data(10000)
+
+def introduce_duplicates(df):
+    num_duplicates = int(len(df) * CONFIG['duplicate_pct'])
+    if num_duplicates > 0:
+        duplicate_indices = np.random.choice(df.index, num_duplicates, replace=True)
+        duplicates = df.loc[duplicate_indices].copy()
+        df = pd.concat([df, duplicates], ignore_index=True)
+    return df
+
+
+def create_dataframe(impressions, clicks, conversions, cpc, dates):
+    campaign_names = get_campaign_names()
     
-    # Make directory
-    # Assume script is run from project root or src folder
-    if os.path.basename(os.getcwd()) == 'src':
-        base_dir = '..'
-    else:
-        base_dir = '.'
-        
-    os.makedirs(os.path.join(base_dir, 'data', 'raw'), exist_ok=True)
+    df = pd.DataFrame({
+        'campaign_id': [f'CMP_{i:06d}' for i in range(1, len(impressions) + 1)],
+        'campaign_name': np.random.choice(campaign_names, len(impressions)),
+        'channel': np.random.choice(get_marketing_channels(), len(impressions)),
+        'date': dates,
+        'impressions': impressions,
+        'clicks': clicks,
+        'conversions': conversions,
+        'cost': np.round(clicks * cpc, 2),
+        'revenue': np.round(conversions * np.random.uniform(25.0, 180.0, len(conversions)), 2),
+        'target_audience': np.random.choice(get_target_audiences(), len(impressions)),
+        'region': np.random.choice(get_regions(), len(impressions))
+    })
+    return df
+
+
+def generate_dataset(num_records=None):
+    if num_records is None:
+        num_records = CONFIG['num_records']
     
-    output_path = os.path.join(base_dir, 'data', 'raw', 'marketing_campaign_data.csv')
+    np.random.seed(CONFIG['random_seed'])
+    
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=365)
+    dates = generate_dates(start_date, num_records)
+    
+    impressions = generate_impressions(num_records)
+    clicks = calculate_clicks_from_impressions(impressions)
+    conversions = calculate_conversions_from_clicks(clicks)
+    cpc = generate_cost_per_click()
+    
+    df = create_dataframe(impressions, clicks, conversions, cpc, dates)
+    df = introduce_missing_values(df)
+    df = introduce_duplicates(df)
+    df = df.sample(frac=1, random_state=CONFIG['random_seed']).reset_index(drop=True)
+    
+    return df
+
+
+def save_to_csv(df, output_dir='data'):
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, 'raw_data.csv')
     df.to_csv(output_path, index=False)
-    print(f"Data generated successfully! Saved to {output_path}")
-    print(f"Dataset shape: {df.shape}")
+    return output_path
+
+
+if __name__ == "__main__":
+    print("Generating marketing campaign data...")
+    df = generate_dataset()
+    output_path = save_to_csv(df)
+    print(f"Generated {len(df)} records -> {output_path}")

@@ -3,152 +3,150 @@ import pandas as pd
 import plotly.express as px
 import os
 
-# --- PAGE SETUP ---
-st.set_page_config(page_title="Marketing ROI Dashboard", page_icon="📈", layout="wide")
 
-# --- DATA LOADING ---
+st.set_page_config(page_title="Marketing Campaign Dashboard", page_icon="📊", layout="wide")
+
+
 @st.cache_data
 def load_data():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(script_dir, '..', 'data', 'processed', 'cleaned_marketing_data.csv')
-    try:
-        df = pd.read_csv(data_path)
-        df['Date'] = pd.to_datetime(df['Date'])
-        return df
-    except FileNotFoundError:
-        st.error(f"Cannot find data at {data_path}. Please run data generation scripts first.")
-        return pd.DataFrame()
+    possible_paths = [
+        'data/cleaned_data.csv',
+        '../data/cleaned_data.csv',
+        os.path.join(os.path.dirname(__file__), '..', 'data', 'cleaned_data.csv')
+    ]
+    for path in possible_paths:
+        if os.path.exists(path):
+            df = pd.read_csv(path)
+            df['date'] = pd.to_datetime(df['date'])
+            return df
+    st.error("Data not found. Run the pipeline first:")
+    st.code("python main.py all", language="bash")
+    return pd.DataFrame()
 
-df = load_data()
 
-if df.empty:
-    st.stop()
+def get_filtered_data(df, channel_filter, region_filter, date_range):
+    mask = pd.Series([True] * len(df))
+    if channel_filter:
+        mask &= df['channel'].isin(channel_filter)
+    if region_filter:
+        mask &= df['region'].isin(region_filter)
+    if date_range:
+        start_date, end_date = date_range
+        mask &= (df['date'] >= pd.to_datetime(start_date))
+        mask &= (df['date'] <= pd.to_datetime(end_date))
+    return df[mask]
 
-# --- SIDEBAR FILTERS ---
-st.sidebar.header("Filter Data")
-channel_filter = st.sidebar.multiselect(
-    "Select Channel:",
-    options=df["Channel"].unique(),
-    default=df["Channel"].unique()
-)
 
-region_filter = st.sidebar.multiselect(
-    "Select Region:",
-    options=df["Region"].unique(),
-    default=df["Region"].unique()
-)
+def calculate_kpis(df):
+    total_spend = df['cost'].sum()
+    total_revenue = df['revenue'].sum()
+    total_impressions = df['impressions'].sum()
+    total_clicks = df['clicks'].sum()
+    total_conversions = df['conversions'].sum()
+    
+    overall_ctr = total_clicks / total_impressions if total_impressions > 0 else 0
+    overall_conv_rate = total_conversions / total_clicks if total_clicks > 0 else 0
+    overall_roi = (total_revenue - total_spend) / total_spend if total_spend > 0 else 0
+    
+    return {
+        'total_spend': total_spend,
+        'total_revenue': total_revenue,
+        'overall_ctr': overall_ctr,
+        'overall_conv_rate': overall_conv_rate,
+        'overall_roi': overall_roi
+    }
 
-# Date filter
-min_date = df["Date"].min().date()
-max_date = df["Date"].max().date()
-date_range = st.sidebar.date_input(
-    "Select Date Range:",
-    [min_date, max_date],
-    min_value=min_date,
-    max_value=max_date
-)
 
-# Apply filters
-if len(date_range) == 2:
-    start_date, end_date = date_range
-    # convert date_range items to datetime to compare
-    start_date = pd.to_datetime(start_date)
-    end_date = pd.to_datetime(end_date)
-    mask = (
-        (df["Channel"].isin(channel_filter)) &
-        (df["Region"].isin(region_filter)) &
-        (df["Date"] >= start_date) &
-        (df["Date"] <= end_date)
-    )
-    filtered_df = df[mask]
-else:
-    filtered_df = df
+def plot_roi_by_channel(df):
+    channel_summary = df.groupby('channel').agg({'cost': 'sum', 'revenue': 'sum'}).reset_index()
+    channel_summary['roi'] = (channel_summary['revenue'] - channel_summary['cost']) / channel_summary['cost']
+    fig = px.bar(channel_summary, x='channel', y='roi', title='ROI by Channel', color='roi', color_continuous_scale='RdYlGn', text_auto='.1%')
+    fig.update_layout(yaxis_tickformat='.0%', plot_bgcolor='white')
+    return fig
 
-st.title("📊 Marketing Campaign Performance & ROI Analytics")
-st.markdown("Monitor campaign effectiveness, ROI, and core metrics across multiple channels.")
 
-# --- KPIs ---
-total_spend = filtered_df["Cost"].sum()
-total_revenue = filtered_df["Revenue"].sum()
-roi = ((total_revenue - total_spend) / total_spend) * 100 if total_spend > 0 else 0
-avg_ctr = filtered_df["CTR"].mean() * 100
-avg_conv_rate = filtered_df["Conversion_Rate"].mean() * 100
+def plot_top_campaigns(df, n=10):
+    campaign_summary = df.groupby('campaign_name').agg({'cost': 'sum', 'revenue': 'sum'}).reset_index()
+    campaign_summary['roi'] = (campaign_summary['revenue'] - campaign_summary['cost']) / campaign_summary['cost']
+    top_campaigns = campaign_summary.nlargest(n, 'revenue')
+    fig = px.bar(top_campaigns, y='campaign_name', x='revenue', orientation='h', title=f'Top {n} Campaigns by Revenue', color='roi', color_continuous_scale='Viridis')
+    fig.update_layout(plot_bgcolor='white', yaxis={'categoryorder': 'total ascending'})
+    return fig
 
-col1, col2, col3, col4, col5 = st.columns(5)
-col1.metric("Total Spend", f"${total_spend:,.2f}")
-col2.metric("Total Revenue", f"${total_revenue:,.2f}")
-col3.metric("Overall ROI", f"{roi:.2f}%")
-col4.metric("Avg CTR", f"{avg_ctr:.2f}%")
-col5.metric("Avg Conv. Rate", f"{avg_conv_rate:.2f}%")
 
-st.markdown("---")
+def plot_monthly_trends(df):
+    df_copy = df.copy()
+    df_copy['month'] = df_copy['date'].dt.to_period('M')
+    monthly = df_copy.groupby('month').agg({'cost': 'sum', 'revenue': 'sum'}).reset_index()
+    monthly['month'] = monthly['month'].dt.to_timestamp()
+    fig = px.line(monthly, x='month', y=['cost', 'revenue'], title='Monthly Spend vs Revenue', labels={'month': 'Month', 'value': 'Amount ($)', 'variable': 'Metric'}, color_discrete_map={'cost': '#ff6b6b', 'revenue': '#4ecdc4'})
+    fig.update_layout(plot_bgcolor='white', legend_title_text='')
+    return fig
 
-# --- VISUALIZATIONS ---
-col_charts1, col_charts2 = st.columns(2)
 
-with col_charts1:
-    # ROI by Channel
-    channel_perf = filtered_df.groupby("Channel")[["Cost", "Revenue"]].sum().reset_index()
-    # Avoid div by zero
-    channel_perf["Cost"] = channel_perf["Cost"].replace(0, 0.01)
-    channel_perf["ROI"] = ((channel_perf["Revenue"] - channel_perf["Cost"]) / channel_perf["Cost"]) * 100
-    fig_roi = px.bar(
-        channel_perf,
-        x="Channel",
-        y="ROI",
-        title="ROI by Channel (%)",
-        color="Channel",
-        text=channel_perf['ROI'].apply(lambda x: f'{x:.1f}%')
-    )
-    fig_roi.update_traces(textposition='outside')
-    st.plotly_chart(fig_roi, use_container_width=True)
+def plot_channel_scatter(df):
+    channel_summary = df.groupby('channel').agg({'ctr': 'mean', 'conversion_rate': 'mean', 'cost': 'sum', 'revenue': 'sum'}).reset_index()
+    fig = px.scatter(channel_summary, x='ctr', y='conversion_rate', size='cost', color='channel', title='Channel Performance: CTR vs Conversion Rate', labels={'ctr': 'Click-Through Rate', 'conversion_rate': 'Conversion Rate', 'cost': 'Total Spend'}, hover_data=['revenue'])
+    fig.update_layout(plot_bgcolor='white', xaxis_tickformat='.1%', yaxis_tickformat='.1%')
+    return fig
 
-with col_charts2:
-    # Top Campaigns
-    top_campaigns = filtered_df.groupby("Campaign_Name")[["Cost", "Revenue"]].sum().reset_index()
-    top_campaigns["Cost"] = top_campaigns["Cost"].replace(0, 0.01)
-    top_campaigns["ROI"] = ((top_campaigns["Revenue"] - top_campaigns["Cost"]) / top_campaigns["Cost"]) * 100
-    top_campaigns = top_campaigns.sort_values(by="Revenue", ascending=False).head(10)
-    fig_camp = px.bar(
-        top_campaigns,
-        x="Revenue",
-        y="Campaign_Name",
-        orientation='h',
-        title="Top 10 Campaigns by Revenue",
-        color="ROI",
-        color_continuous_scale="Viridis"
-    )
-    st.plotly_chart(fig_camp, use_container_width=True)
 
-col_charts3, col_charts4 = st.columns(2)
+def main():
+    df = load_data()
+    if df.empty:
+        st.stop()
+    
+    st.sidebar.header("Filters")
+    available_channels = sorted(df['channel'].unique().tolist())
+    channel_filter = st.sidebar.multiselect("Channel", options=available_channels, default=available_channels)
+    available_regions = sorted(df['region'].unique().tolist())
+    region_filter = st.sidebar.multiselect("Region", options=available_regions, default=available_regions)
+    
+    min_date = df['date'].min().date()
+    max_date = df['date'].max().date()
+    date_range = st.sidebar.date_input("Date Range", value=(min_date, max_date), min_value=min_date, max_value=max_date)
+    
+    filtered_df = get_filtered_data(df, channel_filter, region_filter, date_range)
+    
+    st.title("📊 Marketing Campaign Performance Dashboard")
+    st.markdown("Track ROI, analyze channel performance, and identify optimization opportunities.")
+    
+    st.sidebar.markdown("---")
+    st.sidebar.caption(f"Data: {len(filtered_df):,} of {len(df):,} records")
+    
+    kpis = calculate_kpis(filtered_df)
+    col1, col2, col3, col4, col5 = st.columns(5)
+    col1.metric("Total Spend", f"${kpis['total_spend']:,.0f}")
+    col2.metric("Total Revenue", f"${kpis['total_revenue']:,.0f}")
+    col3.metric("Overall ROI", f"{kpis['overall_roi']:.1%}")
+    col4.metric("Avg CTR", f"{kpis['overall_ctr']:.2%}")
+    col5.metric("Avg Conv Rate", f"{kpis['overall_conv_rate']:.2%}")
+    
+    st.markdown("---")
+    
+    col_chart1, col_chart2 = st.columns(2)
+    with col_chart1:
+        st.plotly_chart(plot_roi_by_channel(filtered_df), use_container_width=True)
+    with col_chart2:
+        st.plotly_chart(plot_top_campaigns(filtered_df), use_container_width=True)
+    
+    col_chart3, col_chart4 = st.columns(2)
+    with col_chart3:
+        st.plotly_chart(plot_monthly_trends(filtered_df), use_container_width=True)
+    with col_chart4:
+        st.plotly_chart(plot_channel_scatter(filtered_df), use_container_width=True)
+    
+    st.markdown("---")
+    st.subheader("📋 Campaign Data")
+    display_cols = ['campaign_name', 'channel', 'region', 'date', 'impressions', 'clicks', 'conversions', 'cost', 'revenue', 'roi']
+    table_df = filtered_df[display_cols].copy()
+    table_df['roi'] = table_df['roi'].apply(lambda x: f"{x:.1%}")
+    table_df['date'] = table_df['date'].dt.strftime('%Y-%m-%d')
+    st.dataframe(table_df.head(100), use_container_width=True, height=400)
+    
+    st.markdown("---")
+    st.caption(f"Data period: {min_date.strftime('%Y-%m-%d')} to {max_date.strftime('%Y-%m-%d')}")
 
-with col_charts3:
-    # Spend vs Revenue Time Series
-    trend_df = filtered_df.groupby(filtered_df["Date"].dt.to_period("M"))[["Cost", "Revenue"]].sum().reset_index()
-    trend_df["Date"] = trend_df["Date"].dt.to_timestamp()
-    fig_trend = px.line(
-        trend_df,
-        x="Date",
-        y=["Cost", "Revenue"],
-        title="Monthly Spend vs Revenue Trends",
-        labels={"value": "Amount ($)", "variable": "Metric"}
-    )
-    st.plotly_chart(fig_trend, use_container_width=True)
 
-with col_charts4:
-    # Channel CTR vs Conversion Rate Scatter
-    scatter_df = filtered_df.groupby("Channel")[["CTR", "Conversion_Rate", "Cost"]].mean().reset_index()
-    fig_scatter = px.scatter(
-        scatter_df,
-        x="CTR",
-        y="Conversion_Rate",
-        size="Cost",
-        color="Channel",
-        title="Avg CTR vs Conversion Rate (Bubble Size = Avg Spend)",
-        labels={"CTR": "Click-Through Rate", "Conversion_Rate": "Conversion Rate"}
-    )
-    st.plotly_chart(fig_scatter, use_container_width=True)
-
-# Datatable
-st.markdown("### Campaign Level Datatable")
-st.dataframe(filtered_df.head(100), use_container_width=True)
+if __name__ == "__main__":
+    main()

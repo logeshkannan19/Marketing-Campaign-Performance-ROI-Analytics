@@ -2,59 +2,150 @@ import pandas as pd
 import numpy as np
 import os
 
-def preprocess_data(input_path, output_path):
-    print(f"Loading data from {input_path}...")
-    df = pd.read_csv(input_path)
-    
-    print(f"Initial shape: {df.shape}")
-    
-    # 1. Handle missing values
-    # Fill missing revenue with median revenue of that channel
-    df['Revenue'] = df.groupby('Channel')['Revenue'].transform(lambda x: x.fillna(x.median()))
-    df['Target_Audience'] = df['Target_Audience'].fillna('Unknown')
-    
-    # 2. Handle duplicates
-    # Sort by Date so that we keep the latest if there's any logic, or just first
-    df = df.drop_duplicates(subset=['Campaign_ID'], keep='first')
-    
-    # 3. Convert date column (from string/datetime to just date)
-    df['Date'] = pd.to_datetime(df['Date']).dt.date
-    
-    # 4. Create calculated metrics
-    # CTR = Clicks / Impressions
-    df['CTR'] = (df['Clicks'] / df['Impressions']).fillna(0)
-    
-    # Conversion Rate = Conversions / Clicks
-    df['Conversion_Rate'] = (df['Conversions'] / df['Clicks']).fillna(0)
-    df.replace([np.inf, -np.inf], 0, inplace=True)
-    
-    # CPC = Cost / Clicks
-    df['CPC'] = (df['Cost'] / df['Clicks']).fillna(0)
-    
-    # ROI = (Revenue - Cost) / Cost
-    df['ROI'] = ((df['Revenue'] - df['Cost']) / df['Cost']).fillna(0)
-    df.replace([np.inf, -np.inf], 0, inplace=True)
-    
-    print(f"Processed shape: {df.shape}")
-    
-    # Ensure directory exists
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    
-    df.to_csv(output_path, index=False)
-    print(f"Processed data saved to {output_path}")
-    
+
+def load_raw_data(filepath):
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"Raw data file not found: {filepath}")
+    df = pd.read_csv(filepath)
+    if df.empty:
+        raise ValueError("Raw data file is empty")
+    print(f"Loaded {len(df)} records from {filepath}")
     return df
 
-if __name__ == "__main__":
-    if os.path.basename(os.getcwd()) == 'src':
-        base_dir = '..'
-    else:
-        base_dir = '.'
-        
-    input_file = os.path.join(base_dir, 'data', 'raw', 'marketing_campaign_data.csv')
-    output_file = os.path.join(base_dir, 'data', 'processed', 'cleaned_marketing_data.csv')
+
+def handle_missing_revenue(df):
+    channel_medians = df.groupby('channel')['revenue'].median()
+    df['revenue'] = df.apply(
+        lambda row: channel_medians.get(row['channel'], df['revenue'].median()) 
+        if pd.isna(row['revenue']) else row['revenue'],
+        axis=1
+    )
+    missing_count = df['revenue'].isna().sum()
+    if missing_count > 0:
+        df['revenue'] = df['revenue'].fillna(df['revenue'].median())
+    return df
+
+
+def handle_missing_audience(df):
+    df['target_audience'] = df['target_audience'].fillna('Unknown')
+    return df
+
+
+def remove_duplicates(df):
+    initial_count = len(df)
+    df = df.drop_duplicates(subset=['campaign_id'], keep='first')
+    duplicates_removed = initial_count - len(df)
+    if duplicates_removed > 0:
+        print(f"Removed {duplicates_removed} duplicate records")
+    return df
+
+
+def parse_dates(df):
+    df['date'] = pd.to_datetime(df['date'], errors='coerce')
+    null_dates = df['date'].isna().sum()
+    if null_dates > 0:
+        print(f"Warning: {null_dates} records have invalid dates, removing them")
+        df = df.dropna(subset=['date'])
+    return df
+
+
+def calculate_ctr(df):
+    df['ctr'] = np.where(df['impressions'] > 0, df['clicks'] / df['impressions'], 0)
+    df['ctr'] = df['ctr'].clip(upper=1.0)
+    return df
+
+
+def calculate_conversion_rate(df):
+    df['conversion_rate'] = np.where(df['clicks'] > 0, df['conversions'] / df['clicks'], 0)
+    df['conversion_rate'] = df['conversion_rate'].clip(upper=1.0)
+    return df
+
+
+def calculate_cpc(df):
+    df['cpc'] = np.where(df['clicks'] > 0, df['cost'] / df['clicks'], 0)
+    return df
+
+
+def calculate_roi(df):
+    df['roi'] = np.where(df['cost'] > 0, (df['revenue'] - df['cost']) / df['cost'], 0)
+    return df
+
+
+def calculate_cac(df):
+    df['cac'] = np.where(df['conversions'] > 0, df['cost'] / df['conversions'], 0)
+    return df
+
+
+def add_derived_features(df):
+    df = calculate_ctr(df)
+    df = calculate_conversion_rate(df)
+    df = calculate_cpc(df)
+    df = calculate_roi(df)
+    df = calculate_cac(df)
+    return df
+
+
+def validate_data_quality(df):
+    issues = {}
+    if (df[['impressions', 'clicks', 'conversions', 'cost', 'revenue']] < 0).any().any():
+        issues['negative_values'] = "Found negative values in numeric fields"
+    high_ctr = (df['ctr'] > 0.5).sum()
+    if high_ctr > 0:
+        issues['high_ctr'] = f"{high_ctr} records have CTR > 50%"
+    high_cpc = (df['cpc'] > 50).sum()
+    if high_cpc > 0:
+        issues['high_cpc'] = f"{high_cpc} records have CPC > $50"
+    return issues
+
+
+def preprocess_data(input_path='data/raw_data.csv', output_path='data/cleaned_data.csv'):
+    print("\n" + "="*50)
+    print("Starting data preprocessing pipeline")
+    print("="*50 + "\n")
     
-    if not os.path.exists(input_file):
-        raise FileNotFoundError(f"Could not find raw data file at {input_file}. Please run data_generator.py first.")
-        
+    print("Step 1: Loading raw data...")
+    df = load_raw_data(input_path)
+    print(f"  Initial records: {len(df)}")
+    
+    print("\nStep 2: Handling missing values...")
+    df = handle_missing_revenue(df)
+    df = handle_missing_audience(df)
+    
+    print("\nStep 3: Removing duplicates...")
+    df = remove_duplicates(df)
+    
+    print("\nStep 4: Parsing dates...")
+    df = parse_dates(df)
+    
+    print("\nStep 5: Calculating derived metrics...")
+    df = add_derived_features(df)
+    
+    print("\nStep 6: Validating data quality...")
+    issues = validate_data_quality(df)
+    if issues:
+        for issue_type, message in issues.items():
+            print(f"  Warning: {message}")
+    else:
+        print("  No major data quality issues found")
+    
+    print("\n" + "="*50)
+    print(f"Final record count: {len(df)}")
+    print("="*50 + "\n")
+    
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    df.to_csv(output_path, index=False)
+    print(f"Saved cleaned data to: {output_path}")
+    return df
+
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1:
+        input_file = sys.argv[1]
+    else:
+        input_file = 'data/raw_data.csv'
+    if len(sys.argv) > 2:
+        output_file = sys.argv[2]
+    else:
+        output_file = 'data/cleaned_data.csv'
     preprocess_data(input_file, output_file)
