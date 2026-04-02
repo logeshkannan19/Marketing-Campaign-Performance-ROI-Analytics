@@ -241,8 +241,6 @@ Data Analytics Student | Aspiring Data Analyst
 
 This project was developed as part of my learning journey in data analytics. It demonstrates my ability to build end-to-end analytics solutions—from data processing and machine learning to building user-facing applications that drive business value.
 
-I'm actively seeking opportunities to apply these skills in real-world data analytics roles.
-
 ---
 
 *Last Updated: April 2026*
