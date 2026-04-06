@@ -1,32 +1,38 @@
+<!-- markdownlint-disable MD033 MD041 -->
+<div align="center">
+
 # Marketing Campaign Performance & ROI Analytics
 
-> Enterprise-grade analytics platform for tracking, analyzing, and optimizing marketing campaign performance across digital channels.
+<p>
+
+[![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-orange?style=for-the-badge)](LICENSE)
+[![Pipeline](https://img.shields.io/badge/Pipeline-ETL%20-orange?style=for-the-badge&logo=github-actions)]()
+[![ML Model](https://img.shields.io/badge/ML-Random%20Forest-green?style=for-the-badge&logo=scikit-learn)]()
+[![Dashboard](https://img.shields.io/badge/Dashboard-Streamlit-red?style=for-the-badge&logo=streamlit)]()
+[![Stars](https://img.shields.io/github/stars/logeshkannan19/Marketing-Campaign-Performance-ROI-Analytics?style=for-the-badge)]()
+[![Forks](https://img.shields.io/github/forks/logeshkannan19/Marketing-Campaign-Performance-ROI-Analytics?style=for-the-badge)]()
+
+</p>
+
+> Enterprise-grade analytics platform for tracking, analyzing, and optimizing marketing campaign performance across digital channels with machine learning and interactive dashboards.
+
+[Overview](#overview) •
+[Features](#features) •
+[Architecture](#architecture) •
+[Tech Stack](#tech-stack) •
+[Quick Start](#quick-start) •
+[Demo](#demo) •
+[Contributing](#contributing)
 
 ---
 
-## Table of Contents
+</div>
 
-1. [Overview](#overview)
-2. [Features](#features)
-3. [Architecture](#architecture)
-4. [Tech Stack](#tech-stack)
-5. [Project Structure](#project-structure)
-6. [Quick Start](#quick-start)
-7. [Key Metrics](#key-metrics)
-8. [Model Performance](#model-performance)
-9. [Dashboard](#dashboard)
-10. [Business Impact](#business-impact)
-11. [Use Cases](#use-cases)
-12. [Limitations](#limitations)
-13. [Future Enhancements](#future-enhancements)
-14. [Contributing](#contributing)
-15. [License](#license)
-
----
-
-## Overview
+## 📌 Overview
 
 Marketing teams often struggle to answer critical business questions:
+
 - Which advertising channels deliver the best ROI?
 - Is budget being allocated efficiently across campaigns?
 - What is the actual cost per customer acquisition?
@@ -35,37 +41,46 @@ This project provides a **data-driven framework** to evaluate campaign effective
 
 ### Key Highlights
 
-| Capability | Description |
-|------------|-------------|
-| **Data Pipeline** | End-to-end flow from raw data generation to actionable insights |
-| **ML Model** | Random Forest regressor achieving **R² = 0.70** for revenue prediction |
-| **Dashboard** | Streamlit-based UI with filters for channel, region, and date range |
-| **Feature Analysis** | Identifies top revenue drivers (clicks: 68%, conversion rate: 14%) |
-| **Dataset** | 8,000+ realistic synthetic marketing records |
+| Metric | Value |
+|--------|-------|
+| **Dataset Size** | 8,000+ records |
+| **ML Model** | Random Forest (R² = 0.70) |
+| **Dashboard** | Streamlit Interactive UI |
+| **Pipeline** | End-to-End ETL |
+| **KPI Metrics** | CTR, CPC, ROI, CAC |
 
 ---
 
-## Features
+## ✨ Features
 
-### Data Pipeline
-- **Synthetic Data Generation**: Creates realistic marketing campaign data
-- **Data Preprocessing**: Handles missing values, removes duplicates, calculates derived KPIs
-- **Feature Engineering**: CTR, CPC, Conversion Rate, ROI, CAC calculations
+### 🔄 Data Pipeline
 
-### Machine Learning
-- **Revenue Prediction**: Random Forest regression model
-- **Feature Importance**: Identifies key revenue drivers
-- **Model Evaluation**: R², RMSE, MAE metrics
+| Feature | Description |
+|---------|-------------|
+| **Data Generation** | Synthetic marketing campaign data with realistic metrics |
+| **Data Preprocessing** | Handles missing values, removes duplicates |
+| **Feature Engineering** | CTR, CPC, Conversion Rate, ROI, CAC calculations |
 
-### Dashboard
-- **KPI Overview**: Total spend, revenue, ROI, CTR, conversion rate
-- **Interactive Visualizations**: ROI by channel, top campaigns, monthly trends
-- **Multi-dimensional Filtering**: By channel, region, and date range
-- **Data Table**: Campaign-level detail view
+### 🤖 Machine Learning
+
+| Feature | Description |
+|---------|-------------|
+| **Revenue Prediction** | Random Forest regression model |
+| **Feature Importance** | Identifies key revenue drivers |
+| **Model Evaluation** | R², RMSE, MAE metrics |
+
+### 📊 Dashboard
+
+| Feature | Description |
+|---------|-------------|
+| **KPI Overview** | Total spend, revenue, ROI, CTR, conversion rate |
+| **Interactive Charts** | ROI by channel, top campaigns, monthly trends |
+| **Multi-dimensional Filtering** | By channel, region, and date range |
+| **Data Table** | Campaign-level detail view |
 
 ---
 
-## Architecture
+## 🏗️ Architecture
 
 ```
 ┌──────────────────┐    ┌───────────────────┐    ┌──────────────────┐    ┌──────────────────┐
@@ -82,64 +97,57 @@ This project provides a **data-driven framework** to evaluate campaign effective
 | Step | Component | Description |
 |------|-----------|-------------|
 | 1 | Data Generation | Creates 8,000+ marketing records |
-| 2 | Preprocessing | Cleans data, calculates CTR, CPC, ROI, CAC |
+| 2 | Preprocessing | Cleans data, calculates derived KPIs |
 | 3 | ML Model | Trains Random Forest to predict revenue |
-| 4 | Dashboard | Visualizes insights for non-technical users |
+| 4 | Dashboard | Visualizes insights for stakeholders |
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 | Category | Technology |
 |----------|------------|
-| **Language** | Python 3.8+ |
-| **Data Processing** | Pandas, NumPy |
-| **Machine Learning** | Scikit-learn (Random Forest Regressor) |
-| **Visualization** | Plotly, Matplotlib |
-| **Dashboard** | Streamlit |
-| **Development** | Jupyter Notebooks |
+| **Language** | <img src="https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white" height="18"> Python 3.8+ |
+| **Data Processing** | <img src="https://img.shields.io/badge/Pandas-150458?style=flat&logo=pandas&logoColor=white" height="18"> Pandas, NumPy |
+| **Machine Learning** | <img src="https://img.shields.io/badge/Scikit--learn-F7931E?style=flat&logo=scikit-learn&logoColor=white" height="18"> Scikit-learn |
+| **Visualization** | <img src="https://img.shields.io/badge/Plotly-3F4B75?style=flat&logo=plotly&logoColor=white" height="18"> Plotly, Matplotlib |
+| **Dashboard** | <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white" height="18"> Streamlit |
+| **CLI** | <img src="https://img.shields.io/badge/Click-000000?style=flat&logo=click&logoColor=white" height="18"> Click |
+| **Testing** | <img src="https://img.shields.io/badge/pytest-0A9EDC?style=flat&logo=pytest&logoColor=white" height="18"> pytest |
 
 ---
 
-## Project Structure
+## 📂 Project Structure
 
 ```
 marketing-campaign-roi-analytics/
-├── data/
-│   ├── raw_data.csv              # Generated raw campaign data
-│   └── cleaned_data.csv          # Preprocessed data with derived metrics
-├── src/
-│   ├── __init__.py
-│   ├── data_generator.py         # Synthetic data generation module
-│   └── data_preprocessing.py     # Data cleaning and feature engineering
-├── models/
-│   ├── __init__.py
-│   └── predict_performance.py    # ML model training and evaluation
-├── dashboard/
-│   ├── __init__.py
-│   └── app.py                    # Streamlit dashboard application
-├── outputs/
-│   └── reports/                  # Generated model metrics and reports
-├── notebooks/
-│   └── eda_analysis.ipynb        # Exploratory data analysis
-├── sql/
-│   └── analysis_queries.sql      # SQL analysis queries
-├── tests/                        # Unit tests (future)
-├── scripts/                      # Utility scripts (future)
-├── main.py                       # CLI entry point
-├── setup.py                      # Package configuration
-├── pyproject.toml               # Project metadata
-├── requirements.txt              # Project dependencies
-├── ARCHITECTURE.md               # System architecture documentation
-├── CONTRIBUTING.md              # Contribution guidelines
-├── ROADMAP.md                    # Project roadmap
-├── LICENSE                       # MIT License
-└── README.md                     # Project documentation
+├── data/                          # Data directory
+│   ├── raw_data.csv               # Generated raw campaign data
+│   └── cleaned_data.csv           # Preprocessed data
+├── src/                           # Source modules
+│   ├── data_generator.py          # Synthetic data generation
+│   └── data_preprocessing.py      # Data cleaning & feature engineering
+├── models/                        # ML models
+│   └── predict_performance.py     # Revenue prediction model
+├── dashboard/                     # Dashboard application
+│   └── app.py                    # Streamlit dashboard
+├── outputs/                       # Generated outputs
+│   └── reports/                   # Model metrics & reports
+├── notebooks/                     # Jupyter notebooks
+│   └── eda_analysis.ipynb         # EDA analysis
+├── tests/                         # Test suite
+│   └── test_pipeline.py           # Unit tests
+├── scripts/                       # Utility scripts
+├── ARCHITECTURE.md                # Architecture documentation
+├── CONTRIBUTING.md               # Contribution guidelines
+├── ROADMAP.md                     # Project roadmap
+├── LICENSE                        # MIT License
+└── README.md                      # Project documentation
 ```
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
@@ -159,15 +167,12 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
-
-# Or install in development mode
-pip install -e .
 ```
 
 ### Usage
 
 ```bash
-# Run the full pipeline (generates data, cleans, trains model, launches dashboard)
+# Run the full pipeline
 python main.py all
 
 # Run individual components
@@ -177,23 +182,32 @@ python main.py model          # Train prediction model
 python main.py dashboard      # Launch interactive dashboard
 ```
 
+### Using Make
+
+```bash
+make install          # Install dependencies
+make all             # Run complete pipeline
+make test            # Run tests
+make docker-build    # Build Docker image
+```
+
 The dashboard will be available at `http://localhost:8501`.
 
 ---
 
-## Key Metrics
+## 📊 Key Metrics
 
 | Metric | Formula | Business Significance |
 |--------|---------|----------------------|
 | **CTR** (Click-Through Rate) | Clicks ÷ Impressions | Measures ad visibility and appeal |
 | **Conversion Rate** | Conversions ÷ Clicks | Indicates landing page effectiveness |
 | **CPC** (Cost Per Click) | Cost ÷ Clicks | Measures efficiency of ad spend |
-| **ROI** (Return on Investment) | (Revenue - Cost) ÷ Cost | Overall profitability of campaign |
+| **ROI** (Return on Investment) | (Revenue - Cost) ÷ Cost | Overall profitability |
 | **CAC** (Customer Acquisition Cost) | Cost ÷ Conversions | Customer acquisition efficiency |
 
 ---
 
-## Model Performance
+## 📈 Model Performance
 
 ### Evaluation Metrics
 
@@ -207,47 +221,27 @@ The dashboard will be available at `http://localhost:8501`.
 
 | Rank | Feature | Importance |
 |------|---------|------------|
-| 1 | Clicks | 68.2% |
-| 2 | Conversion Rate | 14.4% |
-| 3 | CTR | 4.7% |
+| 🥇 | Clicks | 68.2% |
+| 🥈 | Conversion Rate | 14.4% |
+| 🥉 | CTR | 4.7% |
 | 4 | Impressions | 3.7% |
 | 5 | Cost | 2.6% |
 
 ---
 
-## Dashboard
-
-### Visualizations
-
-| Chart | Description |
-|-------|-------------|
-| **ROI by Channel** | Bar chart comparing ROI across Google Ads, Facebook, Email, Instagram, LinkedIn |
-| **Top Campaigns** | Top 10 campaigns ranked by revenue |
-| **Monthly Trends** | 12-month spend vs. revenue line chart |
-| **Channel Performance** | CTR vs. conversion rate scatter plot (bubble size = spend) |
-
-### Features
-
-- **KPI Cards**: Total spend, revenue, ROI, CTR, conversion rate
-- **Interactive Filters**: Channel, region, and date range selection
-- **Campaign Data Table**: Detailed campaign-level information
-- **Responsive Design**: Works on desktop and tablet screens
-
----
-
-## Business Impact
+## 💼 Business Impact
 
 | Impact Area | Value Delivered |
 |-------------|-----------------|
-| **Budget Optimization** | Identify high-performing channels to allocate more spend |
-| **Campaign Selection** | Surface top-performing campaigns for scaling |
-| **Cost Reduction** | Flag underperforming campaigns to reduce wasteful spend |
-| **Faster Decisions** | Self-service dashboard reduces reliance on data teams |
-| **Revenue Forecasting** | Predict expected revenue to plan marketing goals |
+| 📈 **Budget Optimization** | Identify high-performing channels for spend allocation |
+| 🎯 **Campaign Selection** | Surface top-performing campaigns for scaling |
+| 💰 **Cost Reduction** | Flag underperforming campaigns to reduce wasteful spend |
+| ⚡ **Faster Decisions** | Self-service dashboard reduces reliance on data teams |
+| 🔮 **Revenue Forecasting** | Predict expected revenue to plan marketing goals |
 
 ---
 
-## Use Cases
+## 📌 Use Cases
 
 | Use Case | Description |
 |----------|-------------|
@@ -259,48 +253,51 @@ The dashboard will be available at `http://localhost:8501`.
 
 ---
 
-## Limitations
+## ⚠️ Limitations
 
-- **Data Source**: Uses synthetic data generated for demonstration; real-world data would contain additional complexity and noise
-- **Model Scope**: Single-model approach (Random Forest); more advanced ensemble methods could improve predictions
-- **Geographic Scope**: Focused on a limited set of regions; can be extended for multi-country analysis
-- **Real-time Capability**: Batch-processed pipeline; production deployment would require database integration
-
----
-
-## Future Enhancements
-
-- [ ] A/B test analysis for comparing campaign variants
-- [ ] Anomaly detection to identify suspicious traffic patterns
-- [ ] Budget optimization recommendations based on ROI projections
-- [ ] Automated report generation for stakeholder presentations
-- [ ] Integration with cloud data warehouses for real-time processing
-- [ ] Time series forecasting (Prophet/ARIMA) for revenue prediction
-- [ ] LLM-powered natural language queries for campaign insights
+- **Data Source**: Uses synthetic data for demonstration; real-world data would have additional complexity
+- **Model Scope**: Single Random Forest model; ensemble methods could improve predictions
+- **Geographic Scope**: Focused on limited regions; extendable for multi-country analysis
+- **Real-time Capability**: Batch-processed pipeline; production would require database integration
 
 ---
 
-## Contributing
+## 🔮 Future Enhancements
+
+- [ ] A/B test analysis for campaign variant comparison
+- [ ] Anomaly detection for suspicious traffic patterns
+- [ ] Budget optimization recommendations
+- [ ] Automated report generation
+- [ ] Cloud data warehouse integration
+- [ ] Time series forecasting (Prophet/ARIMA)
+- [ ] LLM-powered natural language queries
+
+---
+
+## 🤝 Contributing
 
 Contributions are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines.
 
 ---
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## Author
+## 👤 Author
 
 **Logesh Kannan**
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/logeshkannan19)
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/logeshkannan19)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=flat&logo=github&logoColor=white)](https://github.com/logeshkannan19)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://linkedin.com/in/logeshkannan19)
+[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=flat&logo=twitter&logoColor=white)]()
 
 ---
 
 <p align="center">
   <em>Last Updated: April 2026</em>
 </p>
+
+</div>
