@@ -1,45 +1,55 @@
-# Contributing to Marketing Analytics & ROI Project
+# Contributing to Marketing Campaign Analytics
 
-First off, thank you for considering contributing to this repository. It's people like you that make the open-source community such a great place to learn, inspire, and create.
+Thank you for your interest in contributing to this project.
 
-## 1. Where do I go from here?
+## How to Contribute
 
-If you've noticed a bug or have a feature request/idea, please **open an issue** before submitting a Pull Request.
+### Reporting Issues
 
-## 2. Setting up your environment
+If you find a bug or have a feature request:
+1. Search existing issues to avoid duplicates
+2. Open a new issue with:
+   - Clear description
+   - Steps to reproduce (for bugs)
+   - Expected vs actual behavior
 
-1. **Fork & Clone** the repository.
-2. Ensure you have Python 3.9+ installed.
-3. Create a virtual environment and install dependencies:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   ```
-4. Generate the baseline data and run the preprocessing scripts:
-   ```bash
-   python3 src/data_generator.py
-   python3 src/data_preprocessing.py
-   ```
+### Pull Request Guidelines
 
-## 3. Pull Request Guidelines
+- **Code Quality**: Follow PEP 8 style guidelines
+- **Documentation**: Add docstrings for new functions
+- **Testing**: Verify scripts run without errors
+- **Commit Messages**: Use clear, descriptive messages
 
-- **Code Quality**: Ensure that your Python scripts are clean, human-readable, and well-commented.
-- **Docstrings**: If you are adding new functions to `src/` or `models/`, include standard docstrings detailing inputs, outputs, and purpose.
-- **Testing**: Whenever possible, ensure your scripts run end-to-end without throwing exceptions before submitting.
-- **Commit Messages**: Write clear, descriptive commit messages.
+### Development Setup
 
-## 4. Areas for Contribution
+```bash
+# Clone and setup
+git clone https://github.com/logeshkannan19/Marketing-Campaign-Performance-ROI-Analytics.git
+cd Marketing-Campaign-Performance-ROI-Analytics
 
-We actively welcome contributions in the following areas:
-- **Dashboard Enhancements**: Adding new interactive Plotly charts, expanding the Streamlit metrics, or improving the mobile responsiveness of the UI.
-- **Advanced Machine Learning**: Upgrading the predictive engine to include Time-Series forecasting (ARIMA/Prophet) for future revenue prediction.
-- **Data Integrations**: Providing scripts to connect to live API feeds (e.g. Google Analytics, Facebook Graph API) instead of relying solely on synthetic generation.
-- **SQL Transformations**: Expanding `analysis_queries.sql` to include Customer Lifetime Value (CLTV) estimates and advanced cohort behaviors.
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
 
-## 5. Reporting Bugs
+# Install dependencies
+pip install -r requirements.txt
 
-If you find a bug, please create a GitHub Issue detailing:
-- The traceback or error message
-- The operating system and python version
-- The exact steps needed to replicate the error
+# Run pipeline
+python main.py all
+```
+
+## Contribution Areas
+
+| Area | Description |
+|------|-------------|
+| **Dashboard** | New Plotly visualizations, metrics, UI improvements |
+| **Machine Learning** | Time-series forecasting, model ensembling |
+| **Data Integration** | API connections (Google Analytics, Meta Ads) |
+| **SQL Analytics** | CLTV calculations, cohort analysis |
+
+## Code Style
+
+- Use type hints where appropriate
+- Add docstrings to all public functions
+- Keep functions focused and modular
+- Use meaningful variable names

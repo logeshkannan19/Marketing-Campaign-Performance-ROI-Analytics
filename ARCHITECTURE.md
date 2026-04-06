@@ -1,35 +1,118 @@
 # System Architecture: Marketing Campaign Performance & ROI Analytics
 
+## Overview
+
+This project implements a modular, end-to-end data pipeline moving from raw data generation to interactive visualization and predictive machine learning. The architecture is designed for clarity, reproducibility, and scalability into cloud environments.
+
+---
+
 ## High-Level Architecture
-This project implements a modular, end-to-end data pipeline moving from raw data generation to interactive visualization and predictive machine learning. The architecture is designed for clarity, reproducibility, and potential scaling into cloud environments.
+
+```
+┌──────────────────┐    ┌───────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│     Data Gen     │───▶│  Preprocessing    │───▶│   ML Pipeline    │───▶│    Dashboard     │
+│  (8,000+ recs)   │    │  (KPIs + Clean)   │    │ (Random Forest)  │    │   (Streamlit)    │
+└──────────────────┘    └───────────────────┘    └──────────────────┘    └──────────────────┘
+```
+
+---
 
 ## Component Breakdown
 
 ### 1. Data Ingestion & Storage (`data/`)
-- **Raw Data (`data/raw/`)**: Currently mocking 10,000 records of synthetic data using `src/data_generator.py`. In a production environment, this layer would ingest CSV exports from ad platforms (Google Ads, Meta Ads) or connect to API streams.
-- **Processed Data (`data/processed/`)**: The source of truth for downstream tools. All SQL aggregations, EDA, ML models, and the Dashboard read strictly from the processed output to ensure data consistency.
+
+| Directory | Purpose |
+|-----------|---------|
+| `raw_data.csv` | Synthetic marketing campaign data (8,000+ records) |
+| `cleaned_data.csv` | Preprocessed data with derived KPIs |
+
+In production, this layer would ingest data from ad platforms (Google Ads, Meta Ads) via API or CSV exports.
+
+---
 
 ### 2. Data Engineering (`src/`)
-- **`data_preprocessing.py`**: The ETL engine of the application.
-  - **Responsibilities**: Data cleaning (handling `NaN` values via category medians), deduplication, datatype normalization, and business logic engineering (calculating CTR, CPI, ROI).
-  - **Design Pattern**: Functional pipelines focused on idempotent outputs. Running this script sequentially on the raw data always yields the exact same clean dataset.
+
+#### `data_generator.py`
+- Generates realistic synthetic marketing data
+- Simulates impressions, clicks, conversions, cost, and revenue
+- Introduces realistic data quality issues (missing values, duplicates)
+
+#### `data_preprocessing.py`
+- **ETL Engine** of the application
+- **Responsibilities**:
+  - Data cleaning (handling missing values via channel medians)
+  - Deduplication by campaign ID
+  - Datatype normalization
+  - Business logic engineering (CTR, CPC, ROI, CAC calculations)
+- **Design Pattern**: Idempotent functional pipelines
+
+---
 
 ### 3. Analytics Layer
-- **SQL (`sql/analysis_queries.sql`)**: Structured aggregation queries designed to mirror a Data Warehouse environment (e.g. Snowflake, BigQuery). These queries provide the macro-level KPI reporting logic.
-- **Exploratory Data Analysis (`notebooks/`)**: Interactive Jupyter notebooks utilizing Matplotlib and Seaborn to visually profile data distributions, anomalies, and correlations prior to machine learning.
 
-### 4. Machine Learning (`models/`)
-- **`predict_performance.py`**: A supervised regression pipeline using `RandomForestRegressor` from `scikit-learn`.
-  - **Inputs**: Encoded categorical dimensions (Region, Channel) and numerical metrics (Spend, Impressions, CTR).
-  - **Outputs**: Revenue predictions, R^2 evaluation metrics, and feature importance mappings saved to `reports/` for budget optimization.
+#### SQL (`sql/analysis_queries.sql`)
+- Structured aggregation queries mirroring a Data Warehouse environment (Snowflake, BigQuery)
+- Provides macro-level KPI reporting logic
 
-### 5. Presentation Layer (`dashboard/`)
-- **`app.py`**: A low-latency Streamlit application serving as the UI.
-  - Generates real-time, cross-filtered metrics utilizing `@st.cache_data` for memory efficiency.
-  - Employs Plotly Express for rendering responsive, interactive charts (ROI, trends, distributions).
+#### Exploratory Data Analysis (`notebooks/`)
+- Interactive Jupyter notebooks using Matplotlib and Seaborn
+- Data distribution profiling, anomaly detection, correlation analysis
+
+---
+
+### 4. Machine Learning (`models/predict_performance.py`)
+
+A supervised regression pipeline using `RandomForestRegressor`:
+
+- **Inputs**: Encoded categorical dimensions (Region, Channel) + numerical metrics (Spend, Impressions, CTR)
+- **Outputs**: 
+  - Revenue predictions
+  - R² evaluation metrics
+  - Feature importance rankings
+
+---
+
+### 5. Presentation Layer (`dashboard/app.py`)
+
+- **Streamlit** application serving as the UI
+- **Features**:
+  - Real-time cross-filtered metrics
+  - `@st.cache_data` for memory efficiency
+  - Plotly Express for interactive charts
+  - Multi-dimensional filtering (channel, region, date range)
+
+---
+
+## Data Flow
+
+```
+1. Generation → 2. Preprocessing → 3. ML Training → 4. Dashboard
+     │               │                    │               │
+  8,000+         Derived KPIs         R² = 0.70      Interactive
+  Records        CTR, CPC,           Revenue         Visualizations
+                 ROI, CAC            Prediction
+```
+
+---
 
 ## Scalability & Future State
-While currently running robustly on local environments, the architecture effortlessly supports migration:
-- **Cloud Storage**: Transition local `data/` directories to AWS S3 or GCP Cloud Storage.
-- **Orchestration**: Incorporate Apache Airflow or Prefect to schedule the daily extraction and preprocessing scripts.
-- **Database Backend**: Migrate from static CSV reading to a robust PostgreSQL or Snowflake backend using SQLAlchemy.
+
+The architecture supports migration to production environments:
+
+| Component | Current State | Future State |
+|-----------|--------------|--------------|
+| **Storage** | Local CSV files | AWS S3 / GCP Cloud Storage |
+| **Orchestration** | Manual CLI | Apache Airflow / Prefect |
+| **Database** | Static CSV | PostgreSQL / Snowflake |
+| **ML Training** | Local training | MLOps pipeline (MLflow, Kubeflow) |
+
+---
+
+## Technology Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| **Random Forest** | Robust to overfitting, handles mixed data types, provides feature importance |
+| **Streamlit** | Rapid UI development, Python-native, excellent Plotly integration |
+| **Pandas/NumPy** | Industry-standard data processing, memory efficient |
+| **Plotly** | Interactive visualizations, web-ready rendering |
