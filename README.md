@@ -1,12 +1,5 @@
 # Marketing Campaign Performance & ROI Analytics
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.8+-blue?style=for-the-badge&logo=python" alt="Python">
-  <img src="https://img.shields.io/badge/Machine%20Learning-Scikit--learn-green?style=for-the-badge" alt="ML">
-  <img src="https://img.shields.io/badge/Dashboard-Streamlit-red?style=for-the-badge" alt="Dashboard">
-  <img src="https://img.shields.io/badge/License-MIT-orange?style=for-the-badge" alt="License">
-</p>
-
 > Enterprise-grade analytics platform for tracking, analyzing, and optimizing marketing campaign performance across digital channels.
 
 ---
@@ -116,11 +109,14 @@ marketing-campaign-roi-analytics/
 │   ├── raw_data.csv              # Generated raw campaign data
 │   └── cleaned_data.csv          # Preprocessed data with derived metrics
 ├── src/
+│   ├── __init__.py
 │   ├── data_generator.py         # Synthetic data generation module
 │   └── data_preprocessing.py     # Data cleaning and feature engineering
 ├── models/
+│   ├── __init__.py
 │   └── predict_performance.py    # ML model training and evaluation
 ├── dashboard/
+│   ├── __init__.py
 │   └── app.py                    # Streamlit dashboard application
 ├── outputs/
 │   └── reports/                  # Generated model metrics and reports
@@ -128,7 +124,11 @@ marketing-campaign-roi-analytics/
 │   └── eda_analysis.ipynb        # Exploratory data analysis
 ├── sql/
 │   └── analysis_queries.sql      # SQL analysis queries
+├── tests/                        # Unit tests (future)
+├── scripts/                      # Utility scripts (future)
 ├── main.py                       # CLI entry point
+├── setup.py                      # Package configuration
+├── pyproject.toml               # Project metadata
 ├── requirements.txt              # Project dependencies
 ├── ARCHITECTURE.md               # System architecture documentation
 ├── CONTRIBUTING.md              # Contribution guidelines
@@ -153,8 +153,15 @@ marketing-campaign-roi-analytics/
 git clone https://github.com/logeshkannan19/Marketing-Campaign-Performance-ROI-Analytics.git
 cd Marketing-Campaign-Performance-ROI-Analytics
 
+# Create virtual environment (recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
 # Install dependencies
 pip install -r requirements.txt
+
+# Or install in development mode
+pip install -e .
 ```
 
 ### Usage
@@ -289,6 +296,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Logesh Kannan**  
 Data Analytics Professional
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/logeshkannan19)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/logeshkannan19)
 
 ---
 
